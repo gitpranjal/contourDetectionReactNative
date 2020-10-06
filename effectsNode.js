@@ -1,4 +1,7 @@
 // colors values used for proper greyscale
+const { createCanvas, loadImage } = require('canvas')
+const fs = require('fs')
+
 const magicValues = [0.2126, 0.7152, 0.0722];
 const clampTypes = ['REPEAT', 'REFLECT', 'WRAP', 'WHITE', 'BLACK'];
 
@@ -1228,12 +1231,10 @@ function clearCanvas(canvas, fill = '#FFF') {
     context.fill();
 }
 
-function createCanvas(width = 0, height = 0) {
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    return canvas;
-}
+// function createCanvas(width = 0, height = 0) {
+//     const canvas = createCanvas(width, height);
+//     return canvas;
+// }
 
 function mapCanvasPixels(canvas, callbackFn) {
     const context = canvas.getContext('2d'),
@@ -1423,46 +1424,82 @@ function rasterizeSvgToCanvas(svg, callback, area = Math.pow(2000, 2)) {
 
 function getContour(imgURI)
 {
-    var img = new Image();
-    img.setAttribute('crossOrigin', '');
-    img.onload = () => {
-
-    var destCanvas = effects.greyscale(img)
-
     
 
-    destCanvas = effects.negate(destCanvas)
+    // var destCanvas = effects.greyscale(imgURI)
 
-    destCanvas = effects.edge(destCanvas, 2)
+    // destCanvas = effects.negate(destCanvas)
 
-    destCanvas = effects.threshold(destCanvas)
+    // destCanvas = effects.edge(destCanvas, 2)
 
-    destCanvas = effects.negate(destCanvas)
+    // destCanvas = effects.threshold(destCanvas)
 
-    exportCanvasAsPNG(destCanvas, "contourImg.png")
-    // document.body.appendChild(destCanvas)
+    // destCanvas = effects.negate(destCanvas)
 
-    }
-    img.src = imgURI
+    // exportCanvasAsPNG(destCanvas, "contourImg.png")
+
+
+    grayscale(imgURI)
 
     
 }
+
+function getContourImage(imgSrc)
+{
+
+    loadImage(imgSrc)
+        .then((image) => {
+
+        var destCanvas = createCanvas(image.width, image.height),
+        context = destCanvas.getContext('2d');
+        context.drawImage(image, 50, 0, 70, 70)
+         
+        // console.log('<img src="' + canvas.toDataURL() + '" />')
+
+
+
+            
+
+        context.globalCompositeOperation = 'color';
+        if (context.globalCompositeOperation == 'color') {
+            
+            context.drawImage(image, 0, 0);
+            context.fillStyle = 'black';
+            context.fillRect(0, 0, destCanvas.width,
+            destCanvas.height);
+            
+            
+        } 
+        else 
+        {
+            context.putImageData(mapCanvasPixels(image, pixel => {
+                const v = magicValues[0] * pixel[0] + magicValues[1] * pixel[1] + magicValues[2] * pixel[2];
+                return [v, v, v, pixel[3]];
+            }), 0, 0);
+        }
+
+
+        destCanvas = effects.negate(destCanvas)
+
+        destCanvas = effects.edge(destCanvas, 2)
+
+        destCanvas = effects.threshold(destCanvas)
+
+        destCanvas = effects.negate(destCanvas)
+
+        exportCanvasAsPNG(destCanvas, "contourImg.png")
+
+        // return dstCanvas;
+
+        })
+        .catch((e) => { console.log(e)})
+        
+    }
 
 function exportCanvasAsPNG(canvasElement, fileName) {
 
-
-    var MIME_TYPE = "image/png";
-
-    var imgURL = canvasElement.toDataURL(MIME_TYPE);
-
-    var dlLink = document.createElement('a');
-    dlLink.download = fileName;
-    dlLink.href = imgURL;
-    dlLink.dataset.downloadurl = [MIME_TYPE, dlLink.download, dlLink.href].join(':');
-    console.log(dlLink)
-    document.body.appendChild(dlLink);
-    dlLink.click();
-    document.body.removeChild(dlLink);
+    const buffer = canvasElement.toBuffer('image/png')
+    fs.writeFileSync('./'+fileName, buffer)
 }
 
-getContour("https://static05.jockey.in/uploads/dealimages/8670/detailimages/orange-and-navy-boys-striped-t-shirt-ab09-4.jpg")
+getContourImage("https://static05.jockey.in/uploads/dealimages/8670/detailimages/orange-and-navy-boys-striped-t-shirt-ab09-4.jpg")
