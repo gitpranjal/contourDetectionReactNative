@@ -1,0 +1,38 @@
+<html>    
+<head>    
+    <title id="title">Canvas image testing</title>
+   
+    <script type="text/javascript">
+        function Test1() {
+            var ctx = document.getElementById('srcImg');
+            if (ctx) {
+                ctx = ctx.getContext('2d');
+                //Loading of the home test image - img1
+                var img1 = new Image();
+                
+                //drawing of the test image - img1
+                img1.onload = function () {
+                    //draw background image
+                    ctx.drawImage(img1, 0, 0);
+                    //draw a box over the top
+                    // ctx.fillStyle = "rgba(200, 0, 0, 0.5)";
+                    // ctx.fillRect(0, 0, 500, 500);
+                };
+
+                img1.src = 'https://static05.jockey.in/uploads/dealimages/8670/detailimages/orange-and-navy-boys-striped-t-shirt-ab09-4.jpg';
+            }                
+        }
+    </script>
+    <style type="text/css">
+        canvas { border: 2px solid black; width: 100%; height: 98%; }
+    </style>
+
+</head>
+<body onload="Test1();">    
+    <canvas id="srcImg" width="1280" height="720"></canvas>  
+    <script src="effects.js"></script>
+     <script src="jsfeat/build/jsfeat.js"></script>
+    <!-- <canvas id="destImg" width="1280" height="720"></canvas>          -->
+</body>
+</html>
+
